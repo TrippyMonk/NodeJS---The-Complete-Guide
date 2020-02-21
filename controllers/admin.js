@@ -14,8 +14,11 @@ exports.postAddProduct = (request, response, next) => {
     const price = request.body.price;                    //req.body.price points to the input of the add-product form with attribute name="price"
     const description = request.body.description;        //req.body.description points to the input of the add-product form with attribute name="description"
     const product = new Product(null, title, imageURL, description, price);        //Parameter order must match model!
-    product.save();
-    response.redirect('/');
+    product.save()
+        .then(() => {
+            response.redirect('/');                     //products are saved to database and then page redirects
+        })
+        .catch(err => console.log(err));
 };
 
 exports.getEditProduct = (request, response, next) => {

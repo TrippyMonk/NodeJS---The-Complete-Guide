@@ -2,34 +2,40 @@ const Product = require('../models/product');
 const Cart = require('../models/cart');
 
 exports.getProducts = (request, response, next) => {
-    Product.fetchAll((products) => {
-        response.render('shop/product-list', {
-            pageTitle: 'All Products', 
-            prods: products, 
-            path: '/products', 
-        });
-    });
+    Product.fetchAll()
+        .then(([rows, fieldData]) => {
+            response.render('shop/product-list', {
+                pageTitle: 'All Products', 
+                prods: rows, 
+                path: '/products', 
+            });
+        })
+        .catch(err => console.log(err));
 };
 
 exports.getProduct = (request, response, next) => {
     const prodId = request.params.productID;
-    Product.findById(prodId, product => {                               //Product is the class we are importing from models.  findById is a method of that class
-        response.render('shop/product-detail', {
-            pageTitle: product.title,                                 //gives us the Page Title for the web page
-            product: product,                                         //product on left is an object key: product on right is the single product we are retrieving in function
-            path: '/products'                                         //tells which part of the navigation to highlight as active
-        });
-    });
+    Product.findById(prodId)
+        .then(([product]) => {
+            response.render('shop/product-detail', {
+                product: product[0],
+                pageTitle: product.title,
+                path: '/products'
+            });
+        })
+        .catch(err => console.log(err));
 };
 
 exports.getIndex = (request, response, next) => {
-    Product.fetchAll((products) => {
-        response.render('shop/index', {
-            pageTitle: 'My Shop', 
-            prods: products, 
-            path: '/', 
-        });
-    });
+    Product.fetchAll()
+        .then(([rows, fieldData]) => {
+            response.render('shop/index', {
+                prods: rows,                                    //All of the rows from the products table are now being rendered instead of from products.json file
+                pageTitle: 'Shop',
+                path: '/'
+            });
+        })
+        .catch(err => console.log(err));
 };
 
 exports.getCart = (request, response, next) => {
