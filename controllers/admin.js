@@ -13,15 +13,16 @@ exports.postAddProduct = (request, response, next) => {
     const imageURL = request.body.imageURL;              //req.body.imageURL points to the input of the add-product form with attribute name="imageURL"
     const price = request.body.price;                    //req.body.price points to the input of the add-product form with attribute name="price"
     const description = request.body.description;        //req.body.description points to the input of the add-product form with attribute name="description"
-    Product.create({
+    request.user.createProduct({                         //request.user comes from app.js; createProduct is a special method created by Sequelize based on associations
         title: title,
         price: price,
         imageURL: imageURL,
         description: description
-    })
+        })
         .then(result => {
             // console.log(result);
             console.log('Created Product');
+            response.redirect('/products');
         })
         .catch(err => {
             console.log(err);
@@ -34,17 +35,21 @@ exports.getEditProduct = (request, response, next) => {
         return response.redirect('/');
     }
     const prodId = request.params.productId;                //Because we use :productId in GET route
-    Product.findById(prodId, product => {
-        if (!product) {
-            return response.redirect('/');
-        }
-        response.render('admin/edit-product', {
-            pageTitle: 'Edit Product', 
-            path: '/admin/edit-product',
-            editing: editMode,
-            product: product
-        });
-    });
+    request.user.getProducts({ where: {id: prodId} })
+    // Product.findByPk(prodId)
+        .then(products => {
+            const product = products[0];
+            if (!product) {
+                return response.redirect('/');
+            }
+            response.render('admin/edit-product', {
+                pageTitle: 'Edit Product',
+                path: '/admin/edit-product',
+                editing: editMode,
+                product: product
+            });
+        })
+        .catch(err => console.log(err));
 };
 
 exports.postEditProduct = (request, response, next) => {
@@ -54,23 +59,45 @@ exports.postEditProduct = (request, response, next) => {
     const updatedURL = request.body.imageURL;
     const updatedDescription = request.body.description;
 
-    const updatedProduct = new Product(prodId, updatedTitle, updatedURL, updatedDescription, updatedPrice);
-    updatedProduct.save();
-    response.redirect('/admin/products');
+    Product.findByPk(prodId)
+        .then(product => {
+            product.title = updatedTitle;
+            product.price = updatedPrice;
+            product.imageURL = updatedURL;
+            product.description = updatedDescription;
+            return product.save();                                             //Returns the Save to Database
+        })
+        .then(result => {
+            console.log('UPDATED PRODUCT!');
+            response.redirect('/admin/products');
+        })
+        .catch(err => console.log(err));
+
 };
 
 exports.getProducts = (request, response, next) => {
-    Product.fetchAll((products) => {
-        response.render('admin/products', {
-            pageTitle: 'Admin Products', 
-            prods: products, 
-            path: '/admin/products', 
-        });
-    });
+    request.user.getProducts()
+        .then(products => {
+            response.render('admin/products', {
+                pageTitle: 'Admin Products', 
+                prods: products, 
+                path: '/admin/products', 
+            });
+        })
+        .catch(err => console.log(err));
 };
 
 exports.postDeleteProduct = (request, response, next) => {
     const prodId = request.body.productId;
-    Product.deleteById(prodId);
-    response.redirect('/admin/products');
+    Product.findByPk(prodId)
+        .then(product => {
+            return product.destroy();
+        })
+        .then(result => {
+            console.log('Product Deleted!');
+            response.redirect('/admin/products');
+        })
+        .catch(err => {
+            console.log(err);
+        });
 };
