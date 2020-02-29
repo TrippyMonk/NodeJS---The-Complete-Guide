@@ -7,6 +7,24 @@
 
 <body>
     <%- include('../includes/nav.ejs') %>
+    <main>
+        <%if (orders.length <= 0) { %>
+            <h1>No Orders!</h1>
+        <% } else { %>
+            <ul>
+                <% orders.forEach(order => { %>
+                    <li>
+                        <h1><%= order.id %></h1>
+                        <ul>
+                            <% order.products.forEach(item => { %>     <!-- Loops through each array item from shop.js Controller LN 135-->
+                            <li><%= item.title %></li>
+                            <% }); %>
+                        </ul>
+                    </li>
+                <% }); %>
+            </ul>
+        <% } %>
+    </main>
 
 </body>
 </html>

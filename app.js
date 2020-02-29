@@ -9,6 +9,10 @@ const errorController = require('./controllers/error');
 const sequelize = require('./utils/database');
 const Product = require('./models/product');
 const User = require('./models/user');
+const Cart = require('./models/cart');
+const CartItem = require('./models/cart-item');
+const Order = require('./models/order');
+const OrderItem = require('./models/order-item');
 
 const app = express();
 
@@ -39,6 +43,13 @@ app.use(errorController.pageNotFound);
 //Set Sequelize Associations
 Product.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
 User.hasMany(Product);
+User.hasOne(Cart);
+// Cart.belongTo(User);                                                Not necessary if User.hasOne(Cart) is already entered
+Cart.belongsToMany(Product, {through: CartItem});                                          //One cart can hold many different products
+Product.belongsToMany(Cart, {through: CartItem});                                          //One product can be in many different carts
+Order.belongsTo(User);
+User.hasMany(Order);
+Order.belongsToMany(Product, {through: OrderItem});
 
 sequelize.sync()                                                      //This is triggered by NPM Start, not by requests from a web server
     .then(result => {
@@ -52,6 +63,9 @@ sequelize.sync()                                                      //This is 
     })
     .then(user => {
         // console.log(user);
+        return user.createCart();
+    })
+    .then(cart => {
         app.listen(3000);
     })
     .catch(err => {
