@@ -9,16 +9,13 @@ exports.getAddProduct = (request, response, next) => {
 };
 
 exports.postAddProduct = (request, response, next) => {
-    const title = request.body.title;                    //req.body.title points to the input of the add-product form with attribute name="title"
-    const imageURL = request.body.imageURL;              //req.body.imageURL points to the input of the add-product form with attribute name="imageURL"
-    const price = request.body.price;                    //req.body.price points to the input of the add-product form with attribute name="price"
-    const description = request.body.description;        //req.body.description points to the input of the add-product form with attribute name="description"
-    request.user.createProduct({                         //request.user comes from app.js; createProduct is a special method created by Sequelize based on associations
-        title: title,
-        price: price,
-        imageURL: imageURL,
-        description: description
-        })
+    const title = request.body.title;                    //req.body.title points to the input of the add-product form with attribute name="title" in the body of the POST request
+    const imageURL = request.body.imageURL;              //req.body.imageURL points to the input of the add-product form with attribute name="imageURL" in the body of the POST request
+    const price = request.body.price;                    //req.body.price points to the input of the add-product form with attribute name="price" in the body of the POST request
+    const description = request.body.description;        //req.body.description points to the input of the add-product form with attribute name="description" in the body of the POST
+    const product = new Product(title, price, imageURL, description);
+    product
+        .save()
         .then(result => {
             // console.log(result);
             console.log('Created Product');

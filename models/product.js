@@ -1,27 +1,21 @@
-const Sequelize = require('sequelize');
+const getDb = require('../utils/database').getDb;                                   //Imports access to the shop databse instead of the MongoDB client
 
-const sequelize = require('../utils/database');
-
-const Product = sequelize.define('product', {
-    id: {
-        type: Sequelize.INTEGER,
-        autoIncrement: true,
-        allowNull: false,
-        primaryKey: true
-    },
-    title: Sequelize.STRING,
-    price: {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
-    imageURL: {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
-    description: {
-        type: Sequelize.STRING,
-        allowNull: false
+class Product {
+    constructor(title, price, imageURL, description) {
+        this.title = title;
+        this.price = price;
+        this.imageURL = imageURL;
+        this.description = description;
     }
-});
+
+    save() {
+        const db = getDb();
+        return db.collection('products').insertOne(this)
+            .then(result => {
+                console.log(result)
+            })
+            .catch(err => console.log(err));
+    }
+}
 
 module.exports = Product;
