@@ -4,7 +4,7 @@ const MongoClient = mongodb.MongoClient;                                //Extrac
 let _db;                                                                //_ shows that the variable will only be used locally in this file
 
 const mongoConnect = callback => {
-    MongoClient.connect('mongodb+srv://TrippyMonk:Bushki11er@cluster0-moygw.mongodb.net/shop?retryWrites=true&w=majority')               //Creates connection to MongoDB
+    MongoClient.connect('mongodb+srv://TrippyMonk:<password>@nodejs-12-moygw.mongodb.net/test')               //Creates connection to MongoDB
         .then(client => {
             console.log('Connected');
             _db = client.db();
