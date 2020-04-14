@@ -4,6 +4,8 @@ const path = require('path');
 // 3rd Party Packages
 const express = require('express');
 const bodyParser = require('body-parser');
+const session = require('express-session');
+const SequelizeStore = require('connect-session-sequelize')(session.Store);
 
 const errorController = require('./controllers/error');
 const sequelize = require('./utils/database');
@@ -26,6 +28,14 @@ const authRoutes = require('./routes/auth');
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+    secret: 'my secret',
+    store: new SequelizeStore({
+        db: sequelize
+    }),
+    resave: false,
+    saveUninitialized: false
+}));
 
 app.use((request, response, next) => {
     User.findByPk(1)
